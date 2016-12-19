@@ -18,7 +18,7 @@ docker exec -i cassameta sh -c 'exec cqlsh' < etc/init.cql
 
 ## Run locally
 
-First setup Cassandra, then build and run.
+First setup and run Cassandra (as described above), then build and run the script like this:
 
 ```
 bin/build.sh
