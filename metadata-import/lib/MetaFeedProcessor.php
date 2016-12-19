@@ -13,6 +13,7 @@ class MetaFeedProcessor {
 
     static function normalizeEntity($x) {
         // unset($x['expire']);
+        // unset($x['entityDescriptor']);
         return $x;
     }
 
@@ -80,7 +81,7 @@ class MetaFeedProcessor {
 
             $rawSAMLmeta = $entity->getMetadata20IdP();
 
-            echo "----\n\n"; print_r($rawSAMLmeta); exit;
+            // echo "----\n\n"; print_r($rawSAMLmeta); exit;
 
             $saml2idp = self::normalizeEntity($rawSAMLmeta);
             $entityid = $saml2idp['entityid'];
@@ -157,6 +158,7 @@ class MetaFeedProcessor {
             "added" => $added,
             "updated" => $updated,
             "deleted" => $deleted,
+            "untouched" => (count($existingFeed) - $updated - $deleted)
         ]);
     }
 
