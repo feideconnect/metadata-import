@@ -15,9 +15,15 @@ class MetaFeedProcessor {
         echo "Fetching metadata from: $url\n";
 
         $this->log->info("Processing feed " . $this->key, [
-        "feed" => $this->key,
-        "url" => $this->config['url'],
+            "feed" => $this->key,
+            "url" => $this->config['url'],
         ] );
+
+
+
+        // $file = dirname(dirname(__FILE__)) . '/etc/temp.xml';
+        // echo $file; exit;
+        // if (file_exists()
 
         $xml = MetaFetcher::fetch($this->config['url']);
         $this->log->info("Parsing XML");
@@ -26,6 +32,7 @@ class MetaFeedProcessor {
             "feed" => $this->key,
             "certs" => $this->config['certs']
         ]);
+
         MetaFetcher::validate_signature($metadata, $this->config['certs']);
         MetaFetcher::validate_expiration($metadata);
         $entities = MetaFetcher::findEntitiesRecursive($metadata);
@@ -62,14 +69,14 @@ class MetaFeedProcessor {
         foreach ($entities as $entity) {
 
             $this->log->info("About to process entity", [
-                "entityID" => $entity["entityID"],
+                "entityID" => $entity->entityID,
                 "entity" => $entity
             ]);
 
             // $filename = getEntityFilename($entity);
             // $seen[$filename] = true; // To clean out deleted files later
 
-            $seen[$entity['entityID']] = true;
+            $seen[$entity->entityID] = true;
 
             // $filePath = $targetDir . '/' . $filename;
             // if (file_exists($filePath)) {
