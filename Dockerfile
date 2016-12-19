@@ -33,9 +33,8 @@ RUN git clone https://github.com/datastax/php-driver.git /tmp/php-driver && \
   rm -rf /tmp/php-driver
 
 RUN docker-php-ext-install -j$(nproc) iconv mcrypt
-RUN echo 'extension=mcrypt.so'   >  /usr/local/etc/php/conf.d/php-ext-mcrypt.ini
+# RUN echo 'extension=mcrypt.so'   >  /usr/local/etc/php/conf.d/php-ext-mcrypt.ini
 RUN echo 'extension=cassandra.so' > /usr/local/etc/php/conf.d/php-ext-cassandra.ini
-#RUN echo 'extension=cassandra.so' >/etc/php5/apache2/conf.d/cassandra.ini
 
 COPY etc/php.ini /usr/local/etc/php/
 COPY metadata-import /metadata-import
