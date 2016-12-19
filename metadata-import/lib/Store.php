@@ -107,14 +107,15 @@ class Store {
 	 * @param mixed $value  The value.
 	 * @param int|NULL $expire  The expiration time (unix timestamp), or NULL if it never expires.
 	 */
-     public function insert($feed, $entityId, $metadata, $opUpdate = false) {
+     public function insert($feed, $entityId, $metadata, $uimeta, $reg, $opUpdate = false) {
 
          assert('is_string($feed)');
          assert('is_string($entityId)');
          assert('is_array($metadata)');
          // $key = $this->dbKey($key);
          $metadataJSON = json_encode($metadata, true);
-         $query = 'INSERT INTO "entities" (feed, entityid, metadata, country, enabled, ' . ($opUpdate ? 'updated' : 'created') . ') VALUES (:feed, :entityid, :metadata, :country, :enabled, :ts)';
+         $uimetaJSON = json_encode($uimeta, true);
+         $query = 'INSERT INTO "entities" (feed, entityid, metadata, uimeta, reg, enabled, ' . ($opUpdate ? 'updated' : 'created') . ') VALUES (:feed, :entityid, :metadata, :uimeta, :reg, :enabled, :ts)';
          // echo "About to insert \n"; print_r($query); print_r($params); echo "\n\n";
          // $result = $this->db->query($query, $params);
          $statement = new \Cassandra\SimpleStatement($query);
@@ -122,7 +123,8 @@ class Store {
 			 'feed' => $feed,
 			 'entityid' => $entityId,
 			 'metadata' => $metadataJSON,
-			 'country' => 'no',
+             'uimeta' => $uimetaJSON,
+			 'reg' => $reg,
 			 'enabled' => true,
 			 'ts' => new \Cassandra\Timestamp(),
 		 ];
@@ -143,7 +145,7 @@ class Store {
          assert('is_string($feed)');
          // $key = $this->dbKey($key);
 
-         $query = 'SELECT entityid, feed, enabled, verification, metadata, uimeta, country, created, updated FROM "entities" WHERE feed = :feed ALLOW FILTERING';
+         $query = 'SELECT entityid, feed, enabled, verification, metadata, uimeta, reg, created, updated FROM "entities" WHERE feed = :feed ALLOW FILTERING';
          $params = array('feed' => $feed);
 
          // echo "<pre>About to perform a query \n"; print_r($query); echo "\n"; print_r($params);
@@ -168,6 +170,8 @@ class Store {
          $res = [];
          foreach($response AS $row) {
              $row['metadata'] = json_decode($row['metadata'], true);
+             $row['uimeta'] = json_decode($row['uimeta'], true);
+             $row['verification'] = json_decode($row['verification'], true);
              $row['created'] = (isset($row['created']) ? $row['created']->time() : null);
              $row['updated'] = (isset($row['updated']) ? $row['updated']->time() : null);
              $res[$row['entityid']] = $row;

@@ -26,6 +26,31 @@ class MetaFeedProcessor {
 
     }
 
+
+    static function getUIInfo($x) {
+        $properties = [
+            'description', 'OrganizationName', 'name', 'OrganizationDisplayName', 'url', 'OrganizationURL',
+            'scope',
+            'RegistrationInfo', 'UIInfo', 'DiscoHints'
+        ];
+        $nx = [];
+        foreach($properties AS $p) {
+            if (isset($x[$p])) {
+                $nx[$p] = $x[$p];
+            }
+        }
+        return $nx;
+    }
+
+    static function getReg($x) {
+        if (isset($x['RegistrationInfo']) && is_string($x['RegistrationInfo']['registrationAuthority'])) {
+            return $x['RegistrationInfo']['registrationAuthority'];
+        }
+        return null;
+    }
+
+
+
     function process() {
 
         $url = $this->config['url'];
@@ -116,7 +141,7 @@ class MetaFeedProcessor {
                         "entityID" => $entityid,
                         "diff" => $diff,
                     ]);
-                    $this->store->insert($this->key, $entityid, $saml2idp, TRUE); // UPDATE
+                    $this->store->insert($this->key, $entityid, $saml2idp, self::getUIInfo($saml2idp), self::getReg($saml2idp), TRUE); // UPDATE
                     $updated++;
 
 
@@ -140,7 +165,7 @@ class MetaFeedProcessor {
                     ]);
                 }
 
-                $this->store->insert($this->key, $entityid, $saml2idp, FALSE); // New entry
+                $this->store->insert($this->key, $entityid, $saml2idp, self::getUIInfo($saml2idp), self::getReg($saml2idp), FALSE); // New entry
                 $added++;
             }
 

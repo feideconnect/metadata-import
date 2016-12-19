@@ -7,10 +7,20 @@ putenv('CASSANDRA_NODES=' . $_ENV['CASSANDRA_PORT_9042_TCP_ADDR']);
 $store = new Store();
 
 $feed = 'edugain';
-$metadata = [
-  'name' => ['no' => 'Test data'],
-  'descr' => ['no' => 'Yay'],
-  'entityId' => 'https://blah'
-];
-$store->insert($feed, $metadata['entityId'], $metadata);
+// $metadata = [
+//   'name' => ['no' => 'Test data'],
+//   'descr' => ['no' => 'Yay'],
+//   'entityId' => 'https://blah'
+// ];
+// $store->insert($feed, $metadata['entityId'], $metadata);
 $fdata = $store->getFeed($feed);
+
+
+foreach($fdata AS $entityid => $entity) {
+    if ($entity['metadata']['DiscoHints']) {
+        echo "------- " . $entityid . " ---------\n";
+        print_r($entity);
+        break;
+
+    }
+}

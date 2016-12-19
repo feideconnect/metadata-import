@@ -10,7 +10,7 @@ CREATE TABLE entities (
     verification text,	-- JSON Structure
 	metadata text,      -- JSON Structure
     uimeta text,        -- JSON Structure
-	country text,
+	reg text,
 	created timestamp,
 	updated timestamp,
 
