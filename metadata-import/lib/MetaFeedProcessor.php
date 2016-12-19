@@ -90,21 +90,26 @@ class MetaFeedProcessor {
             }
 
             if (isset($_ENV['DEBUG_RANDOMIZE']) && boolval($_ENV['DEBUG_RANDOMIZE'])) {
-                if (mt_rand(0, 10) >= 9) {
+                if (mt_rand(0, 100) >= 99) {
                     continue;
                 }
-                if (mt_rand(0, 10) >= 9) {
+                if (mt_rand(0, 100) >= 100) {
                     $saml2idp["name"] = [
                         "en" => "New random name",
                     ];
                 }
             }
 
+            // if ($existingFeed[$entityid]) {
+            //     print_r($existingFeed[$entityid]); exit;
+            // }
+
             $seen[$entityid] = true;
-            if ($existingFeed[$entityid]) {
+            if ($existingFeed[$entityid] && $existingFeed[$entityid]['enabled']) {
                 // There already exist an entry.
 
                 if (!self::compareEntities($existingFeed[$entityid]['metadata'], $saml2idp)) {
+
 
                     $diff = JSONTools::diff($existingFeed[$entityid]['metadata'], $saml2idp);
                     $this->log->info("UPDATING entity", [
@@ -113,6 +118,7 @@ class MetaFeedProcessor {
                     ]);
                     $this->store->insert($this->key, $entityid, $saml2idp, TRUE); // UPDATE
                     $updated++;
+
 
                 } else  {
                     // $this->log->info("NOOP entity", [
@@ -123,9 +129,17 @@ class MetaFeedProcessor {
                 }
 
             } else {
-                $this->log->info("INSERTING entity", [
-                    "entityID" => $entityid,
-                ]);
+
+                if ($existingFeed[$entityid] ) {
+                    $this->log->info("INSERTING (RE-ENABLING) entity", [
+                        "entityID" => $entityid,
+                    ]);
+                } else {
+                    $this->log->info("INSERTING entity", [
+                        "entityID" => $entityid,
+                    ]);
+                }
+
                 $this->store->insert($this->key, $entityid, $saml2idp, FALSE); // New entry
                 $added++;
             }
@@ -140,11 +154,16 @@ class MetaFeedProcessor {
 
         foreach($existingFeed AS $entityid => $oldEntity) {
 
+            if ($oldEntity['enabled'] === false) {
+
+                continue;
+            }
+
             if (!$seen[$entityid]) {
                 $this->log->info("DELETING entity", [
                     "entityID" => $entityid,
                 ]);
-                $this->store->delete($this->key, $entityid);
+                $this->store->softDelete($this->key, $entityid);
                 $deleted++;
             }
 

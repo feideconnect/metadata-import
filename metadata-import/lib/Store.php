@@ -114,7 +114,7 @@ class Store {
          assert('is_array($metadata)');
          // $key = $this->dbKey($key);
          $metadataJSON = json_encode($metadata, true);
-         $query = 'INSERT INTO "entities" (feed, entityid, metadata, country, ' . ($opUpdate ? 'updated' : 'created') . ') VALUES (:feed, :entityid, :metadata, :country, :ts)';
+         $query = 'INSERT INTO "entities" (feed, entityid, metadata, country, enabled, ' . ($opUpdate ? 'updated' : 'created') . ') VALUES (:feed, :entityid, :metadata, :country, :enabled, :ts)';
          // echo "About to insert \n"; print_r($query); print_r($params); echo "\n\n";
          // $result = $this->db->query($query, $params);
          $statement = new \Cassandra\SimpleStatement($query);
@@ -123,6 +123,7 @@ class Store {
 			 'entityid' => $entityId,
 			 'metadata' => $metadataJSON,
 			 'country' => 'no',
+			 'enabled' => true,
 			 'ts' => new \Cassandra\Timestamp(),
 		 ];
          $options = new \Cassandra\ExecutionOptions([
@@ -142,7 +143,7 @@ class Store {
          assert('is_string($feed)');
          // $key = $this->dbKey($key);
 
-         $query = 'SELECT entityid, feed, metadata,country,created,updated FROM "entities" WHERE feed = :feed ALLOW FILTERING';
+         $query = 'SELECT entityid, feed, enabled, verification, metadata, uimeta, country, created, updated FROM "entities" WHERE feed = :feed ALLOW FILTERING';
          $params = array('feed' => $feed);
 
          // echo "<pre>About to perform a query \n"; print_r($query); echo "\n"; print_r($params);
@@ -185,6 +186,8 @@ class Store {
 	public function delete($feed, $entityId) {
 		assert('is_string($feed)');
 		assert('is_string($entityId)');
+
+
 		$params = [
 			"feed" 	=> $feed,
 			"entityid"	=> $entityId
@@ -204,4 +207,37 @@ class Store {
 			throw $e;
 		}
 	}
+
+
+
+	/**
+	 * Delete a value from the datastore.
+	 *
+	 * @param string $feed  Feed.
+	 * @param string $entityId  Entityid
+	 */
+	public function softDelete($feed, $entityId) {
+		assert('is_string($feed)');
+		assert('is_string($entityId)');
+
+		$query = 'INSERT INTO "entities" (feed, entityid, enabled, updated) VALUES (:feed, :entityid, :enabled, :ts)';
+		$statement = new \Cassandra\SimpleStatement($query);
+		$params = [
+			'feed' => $feed,
+			'entityid' => $entityId,
+			'enabled' => false,
+			'ts' => new \Cassandra\Timestamp(),
+		];
+		$options = new \Cassandra\ExecutionOptions([
+			'arguments' => $params,
+			'consistency' => \Cassandra::CONSISTENCY_QUORUM,
+		]);
+		try {
+			$this->db->execute($statement, $options);
+		} catch (\Cassandra\Exception $e) {
+			error_log("Received cassandra exception in set: " . $e);
+			throw $e;
+		}
+	}
+
 }
