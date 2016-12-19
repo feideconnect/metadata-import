@@ -24,3 +24,13 @@ First setup and run Cassandra (as described above), then build and run the scrip
 bin/build.sh
 bin/rundev.sh
 ```
+
+### To run the test.php script for development
+
+The rundev.sh opens a bash shell in the container. Run:
+
+```
+clear; ./test.php
+```
+
+rundev.sh also mounts the lib directory and the scripts. It means you can develop locally and re-test immediately.
