@@ -2,6 +2,7 @@
     "require": {
         "simplesamlphp/saml2": "^1.6",
         "simplesamlphp/composer-module-installer": "~1.0",
+        "simplesamlphp/simplesamlphp": "dev-master",
         "monolog/monolog": "~1.11.0"
     }
 }
