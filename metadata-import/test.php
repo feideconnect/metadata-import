@@ -12,7 +12,5 @@ $metadata = [
   'descr' => ['no' => 'Yay'],
   'entityId' => 'https://blah'
 ];
-
-#$store->insertOrUpdate($feed, $metadata['entityId'], $metadata);
-
+$store->insert($feed, $metadata['entityId'], $metadata);
 $fdata = $store->getFeed($feed);
