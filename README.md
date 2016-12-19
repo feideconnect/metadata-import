@@ -2,6 +2,11 @@
 
 This repository holds the job that fetches SAML 2.0 metadata from international federations. The only job of the repository is to fetch, parse & validate the metadata, and then store it to a Cassandra store. Other jobs that needs access to the metadata can then read it from that repository.
 
+## Requirements and dependencies
+
+Running with simplesamlphp and SAML2 lib `dev-master` because of need of the RegistrationInfo support in SAMLParser.php.
+
+
 ## Development / testing
 
 This section goes through the steps for running this script in a development environment.
