@@ -1,5 +1,7 @@
 <?php
 
+require_once(dirname(__FILE__) . '/JSONTools.php');
+
 class MetaFeedProcessor {
     protected $log, $store, $key, $config;
     function __construct($store, $key, $config) {
@@ -9,115 +11,153 @@ class MetaFeedProcessor {
         $this->config = $config;
     }
 
+    static function normalizeEntity($x) {
+        // unset($x['expire']);
+        return $x;
+    }
+
+    static function compareEntities($a, $b) {
+
+        // $xa = self::normalizeEntity($a);
+        // $xb = self::normalizeEntity($b);
+
+        return ($a == $b);
+
+    }
+
     function process() {
-        echo "\n";
-        echo "Processing feed: $name\n";
-        echo "Fetching metadata from: $url\n";
+
+        $url = $this->config['url'];
+        $doValidate = true;
+        if (isset($_ENV['DEBUG_FAST_UNSECURE']) && boolval($_ENV['DEBUG_FAST_UNSECURE'])) {
+            // Override with local cached file for development.
+            $file = dirname(dirname(__FILE__)) . '/temp.xml';
+            if (file_exists($file)) {
+                $url = $file;
+            }
+            $doValidate = false;
+        }
 
         $this->log->info("Processing feed " . $this->key, [
             "feed" => $this->key,
-            "url" => $this->config['url'],
+            "url" => $url,
+            "validate" => $doValidate,
         ] );
+        $xml = MetaFetcher::fetch($url);
 
+        if ($doValidate) {
+            $this->log->info("Parsing XML", [
+                "feed" => $this->key,
+            ]);
 
+            $metadata = MetaFetcher::parse($xml);
+            $this->log->info("Validating metadata", [
+                "feed" => $this->key,
+                // "certs" => $this->config['certs']
+            ]);
+            MetaFetcher::validate_signature($metadata, $this->config['certs']);
+            MetaFetcher::validate_expiration($metadata);
+        }
 
-        // $file = dirname(dirname(__FILE__)) . '/etc/temp.xml';
-        // echo $file; exit;
-        // if (file_exists()
+        unset($metadata);
 
-        $xml = MetaFetcher::fetch($this->config['url']);
-        $this->log->info("Parsing XML");
-        $metadata = MetaFetcher::parse($xml);
-        $this->log->info("Validating metadata", [
-            "feed" => $this->key,
-            "certs" => $this->config['certs']
-        ]);
-
-        MetaFetcher::validate_signature($metadata, $this->config['certs']);
-        MetaFetcher::validate_expiration($metadata);
-        $entities = MetaFetcher::findEntitiesRecursive($metadata);
-        MetaFetcher::cleanEntities($entities);
-
-        // $targetDir = dirname(__FILE__) . '/output/' . $name;
-        // if (!is_dir($targetDir)) {
-        //     echo "Creating output directory: $targetDir\n";
-        //     createDir($targetDir);
-        // }
-
-
-        // TODO: Fetch entities
-        // $entities = $this->store->getFeed($this->key);
-        // echo "We Got entities";
-        // print_r($entities);
-        // exit;
-
-
+        $entities = SimpleSAML_Metadata_SAMLParser::parseDescriptorsString($xml);
+        $existingFeed = $this->store->getFeed($this->key);
 
         $total = count($entities);
         $added = 0;
         $updated = 0;
         $deleted = 0;
 
-        echo "Processing $total entities.\n";
-
         $this->log->info("Processing entities", [
             "feed" => $this->key,
-            "count" => $total
+            "feedCount" => $total,
+            "existingCount" => count($existingFeed),
         ]);
 
         $seen = array();
         foreach ($entities as $entity) {
 
-            $this->log->info("About to process entity", [
-                "entityID" => $entity->entityID,
-                "entity" => $entity
-            ]);
+            $rawSAMLmeta = $entity->getMetadata20IdP();
 
-            // $filename = getEntityFilename($entity);
-            // $seen[$filename] = true; // To clean out deleted files later
+            echo "----\n\n"; print_r($rawSAMLmeta); exit;
 
-            $seen[$entity->entityID] = true;
-
-            // $filePath = $targetDir . '/' . $filename;
-            // if (file_exists($filePath)) {
-            //     $old = file_get_contents($filePath);
-            // } else {
-            //     $old = false;
-            // }
-
-            // $new = processEntity($entity, $processors);
-            if ($old === $new) {
-                continue; // Unchanged
+            $saml2idp = self::normalizeEntity($rawSAMLmeta);
+            $entityid = $saml2idp['entityid'];
+            if (!isset($entityid)) {
+                continue;
             }
 
-            // file_put_contents($filePath, $new);
-            // if ($old === false) {
-            //     echo 'Added: ' . $entity->entityID . "\n";
-            //     $added += 1;
-            // } else {
-            //     echo 'Updated: ' . $entity->entityID . "\n";
-            //     $updated += 1;
-            // }
+            if (isset($_ENV['DEBUG_RANDOMIZE']) && boolval($_ENV['DEBUG_RANDOMIZE'])) {
+                if (mt_rand(0, 10) >= 9) {
+                    continue;
+                }
+                if (mt_rand(0, 10) >= 9) {
+                    $saml2idp["name"] = [
+                        "en" => "New random name",
+                    ];
+                }
+            }
+
+            $seen[$entityid] = true;
+            if ($existingFeed[$entityid]) {
+                // There already exist an entry.
+
+                if (!self::compareEntities($existingFeed[$entityid]['metadata'], $saml2idp)) {
+
+                    $diff = JSONTools::diff($existingFeed[$entityid]['metadata'], $saml2idp);
+                    $this->log->info("UPDATING entity", [
+                        "entityID" => $entityid,
+                        "diff" => $diff,
+                    ]);
+                    $this->store->insert($this->key, $entityid, $saml2idp, TRUE); // UPDATE
+                    $updated++;
+
+                } else  {
+                    // $this->log->info("NOOP entity", [
+                    //     "entityID" => $entityid,
+                    // ]);
+                    // New entry is identical with the old one.
+                    continue;
+                }
+
+            } else {
+                $this->log->info("INSERTING entity", [
+                    "entityID" => $entityid,
+                ]);
+                $this->store->insert($this->key, $entityid, $saml2idp, FALSE); // New entry
+                $added++;
+            }
+
+            if (isset($_ENV['DEBUG_DUMP']) && boolval($_ENV['DEBUG_DUMP'])) {
+                $outfilename = '/metadata-import/var/' . sha1($entityid) . '.json';
+                echo "Writing to " . $outfilename . "\n";
+                file_put_contents($outfilename, json_encode($saml2idp, JSON_PRETTY_PRINT));
+            }
+
         }
-        // foreach (scandir($targetDir) as $entry) {
-        //     if ($entry[0] === '.') {
-        //         continue; // Skip hidden files / directories
-        //     }
-        //     if (substr($entry, -4) !== '.xml') {
-        //         continue; // Ignore non-XML files.
-        //     }
-        //     if (isset($seen[$entry])) {
-        //         continue; // Existing metadata file.
-        //     }
-        //
-        //     // This is an unknown XML file. Delete it.
-        //     echo 'Deleted: ' . $entry . "\n";
-        //     unlink($targetDir . '/' . $entry);
-        //     $deleted += 1;
-        // }
 
-        // echo "Processed $total entities. $added added, $updated updated, $deleted deleted.\n";
+        foreach($existingFeed AS $entityid => $oldEntity) {
 
+            if (!$seen[$entityid]) {
+                $this->log->info("DELETING entity", [
+                    "entityID" => $entityid,
+                ]);
+                $this->store->delete($this->key, $entityid);
+                $deleted++;
+            }
+
+        }
+
+
+        $this->log->info("Completed processing entities", [
+            "feed" => $this->key,
+            "feedCount" => $total,
+            "existingCount" => count($existingFeed),
+            "added" => $added,
+            "updated" => $updated,
+            "deleted" => $deleted,
+        ]);
     }
 
 }

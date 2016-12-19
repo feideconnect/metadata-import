@@ -25,8 +25,7 @@ class MetaEngine {
         $failed = false;
         foreach ($this->feeds as $feed => $feedconfig) {
             try {
-                echo 'Yay';
-                $this->log->info('About to process logs for ' . $feed, $feedconfig);
+                // $this->log->info('About to process logs for ' . $feed, $feedconfig);
                 $fp = new MetaFeedProcessor($this->store, $feed, $feedconfig);
                 $fp->process();
 

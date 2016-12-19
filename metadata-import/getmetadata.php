@@ -17,9 +17,6 @@ $me = new MetaEngine();
 $me->process();
 
 
-
-
-
 function formatXML(DOMElement $root, $indentBase = '') {
     if (!is_string($indentBase)) {
         throw new \InvalidArgumentException('Invalid input parameters');
