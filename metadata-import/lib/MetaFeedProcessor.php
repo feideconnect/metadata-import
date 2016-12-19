@@ -55,7 +55,7 @@ class MetaFeedProcessor {
 
         $url = $this->config['url'];
         $doValidate = true;
-        if (isset($_ENV['DEBUG_FAST_UNSECURE']) && boolval($_ENV['DEBUG_FAST_UNSECURE'])) {
+        if (isset($_ENV['DEBUG_FAST_UNSECURE']) && $_ENV['DEBUG_FAST_UNSECURE'] === "true") {
             // Override with local cached file for development.
             $file = dirname(dirname(__FILE__)) . '/temp.xml';
             if (file_exists($file)) {
@@ -114,7 +114,7 @@ class MetaFeedProcessor {
                 continue;
             }
 
-            if (isset($_ENV['DEBUG_RANDOMIZE']) && boolval($_ENV['DEBUG_RANDOMIZE'])) {
+            if (isset($_ENV['DEBUG_RANDOMIZE']) && $_ENV['DEBUG_RANDOMIZE'] === 'true') {
                 if (mt_rand(0, 100) >= 99) {
                     continue;
                 }
@@ -169,7 +169,7 @@ class MetaFeedProcessor {
                 $added++;
             }
 
-            if (isset($_ENV['DEBUG_DUMP']) && boolval($_ENV['DEBUG_DUMP'])) {
+            if (isset($_ENV['DEBUG_DUMP']) && $_ENV['DEBUG_DUMP'] === 'true') {
                 $outfilename = '/metadata-import/var/' . sha1($entityid) . '.json';
                 echo "Writing to " . $outfilename . "\n";
                 file_put_contents($outfilename, json_encode($saml2idp, JSON_PRETTY_PRINT));
