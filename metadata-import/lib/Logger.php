@@ -40,29 +40,29 @@ class Logger {
         unset($value);
         switch ($level) {
             case 'alert':
-                $this->log->addAlert($str, $data);
-                break;
+            $this->log->addAlert($str, $data);
+            break;
             case 'error':
-                $this->log->addError($str, $data);
-                break;
+            $this->log->addError($str, $data);
+            break;
             case 'warning':
-                $this->log->addWarning($str, $data);
-                break;
+            $this->log->addWarning($str, $data);
+            break;
             case 'info':
-                $this->log->addInfo($str, $data);
-                break;
+            $this->log->addInfo($str, $data);
+            break;
             case 'debug':
             default:
-                $this->log->addDebug($str, $data);
-                break;
+            $this->log->addDebug($str, $data);
+            break;
         }
     }
     /* ----- Class methods ----- */
     /**
-     * The way to load a global config object.
-     *
-     * @return [type] [description]
-     */
+    * The way to load a global config object.
+    *
+    * @return [type] [description]
+    */
     public static function getInstance() {
         if (!is_null(self::$instance)) {
             return self::$instance;
