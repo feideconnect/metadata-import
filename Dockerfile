@@ -20,7 +20,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   php5-dev \
   php5-gmp \
   php5-imagick \
-  php5-mcrypt \
+  libmcrypt-dev \
   && rm -rf /var/lib/apt/lists/*
 
 RUN git clone https://github.com/datastax/php-driver.git /tmp/php-driver && \
@@ -32,14 +32,19 @@ RUN git clone https://github.com/datastax/php-driver.git /tmp/php-driver && \
   cd / && \
   rm -rf /tmp/php-driver
 
+RUN docker-php-ext-install -j$(nproc) iconv mcrypt
+RUN echo 'extension=mcrypt.so'   >  /usr/local/etc/php/conf.d/php-ext-mcrypt.ini
 RUN echo 'extension=cassandra.so' > /usr/local/etc/php/conf.d/php-ext-cassandra.ini
 #RUN echo 'extension=cassandra.so' >/etc/php5/apache2/conf.d/cassandra.ini
 
+COPY etc/php.ini /usr/local/etc/php/
 COPY metadata-import /metadata-import
+
 RUN curl https://getcomposer.org/composer.phar > /metadata-import/composer.phar
+RUN php --ini
 RUN cd /metadata-import && php ./composer.phar install --no-dev
 
-COPY etc/php.ini /usr/local/etc/php/
+
 
 WORKDIR /metadata-import
 
