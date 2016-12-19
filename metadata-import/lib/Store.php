@@ -10,8 +10,6 @@ function getconfig($name, $default = null) {
 	return $val;
 }
 
-
-
 /**
  * A Cassandra (database) datastore for metadata
  */
@@ -21,14 +19,14 @@ class Store {
      *
 	 * @var DB
 	 */
-	public $db;
+    public $db;
 	/**
 	 * Initialize the SQL datastore.
 	 */
 	public function __construct() {
 		$config = [];
 		$keyspace 	= getconfig('CASSANDRA_KEYSPACE', 'metadata');
-		$nodes 		  = explode(' ', getconfig('CASSANDRA_NODES'));
+		$nodes 		= explode(' ', getconfig('CASSANDRA_NODES'));
 		$use_ssl    = boolval( getconfig('CASSANDRA_USESSL', false) );
 		$ssl_ca     = getconfig('CASSANDRA_CA');
 		$username   = getconfig('CASSANDRA_USERNAME');
@@ -116,12 +114,17 @@ class Store {
          assert('is_array($metadata)');
          // $key = $this->dbKey($key);
          $metadataJSON = json_encode($metadata, true);
-         $query = 'INSERT INTO "entities" (id, metadata, country, feed, ' . ($opUpdate ? 'updated' : 'created') . ') VALUES (:id, :metadata, :country, :feed, :ts)';
+         $query = 'INSERT INTO "entities" (feed, entityid, metadata, country, ' . ($opUpdate ? 'updated' : 'created') . ') VALUES (:feed, :entityid, :metadata, :country, :ts)';
          // echo "About to insert \n"; print_r($query); print_r($params); echo "\n\n";
          // $result = $this->db->query($query, $params);
          $statement = new \Cassandra\SimpleStatement($query);
-         $params = array('id' => $entityId, 'metadata' => $metadataJSON, 'country' => 'no', 'feed' => $feed);
-         $params['ts'] = new \Cassandra\Timestamp();
+         $params = [
+			 'feed' => $feed,
+			 'entityid' => $entityId,
+			 'metadata' => $metadataJSON,
+			 'country' => 'no',
+			 'ts' => new \Cassandra\Timestamp(),
+		 ];
          $options = new \Cassandra\ExecutionOptions([
              'arguments' => $params,
              'consistency' => \Cassandra::CONSISTENCY_QUORUM,
@@ -139,7 +142,7 @@ class Store {
          assert('is_string($feed)');
          // $key = $this->dbKey($key);
 
-         $query = 'SELECT id,metadata,country,feed,created,updated FROM "entities" WHERE feed = :feed ALLOW FILTERING';
+         $query = 'SELECT entityid, feed, metadata,country,created,updated FROM "entities" WHERE feed = :feed ALLOW FILTERING';
          $params = array('feed' => $feed);
 
          // echo "<pre>About to perform a query \n"; print_r($query); echo "\n"; print_r($params);
@@ -166,9 +169,9 @@ class Store {
              $row['metadata'] = json_decode($row['metadata'], true);
              $row['created'] = (isset($row['created']) ? $row['created']->time() : null);
              $row['updated'] = (isset($row['updated']) ? $row['updated']->time() : null);
-             $res[] = $row;
+             $res[$row['entityid']] = $row;
          }
-         print_r($res);
+         //  print_r($res);
          return $res;
 
      }
@@ -176,18 +179,17 @@ class Store {
 	/**
 	 * Delete a value from the datastore.
 	 *
-	 * @param string $type  The datatype.
-	 * @param string $key  The key.
+	 * @param string $feed  Feed.
+	 * @param string $entityId  Entityid
 	 */
-	public function delete($type, $key) {
-		assert('is_string($type)');
-		assert('is_string($key)');
-		$key = $this->dbKey($key);
+	public function delete($feed, $entityId) {
+		assert('is_string($feed)');
+		assert('is_string($entityId)');
 		$params = [
-			"type" 	=> $type,
-			"key"	=> $key
+			"feed" 	=> $feed,
+			"entityid"	=> $entityId
 		];
-		$query = 'DELETE FROM "session" WHERE (type = :type AND key = :key)';
+		$query = 'DELETE FROM "entities" WHERE feed = :feed AND entityid = :entityid';
 		// echo "About to delete \n"; print_r($query); print_r($params); echo "\n\n";
 		// $result = $this->db->query($query, $params);
 		$statement = new \Cassandra\SimpleStatement($query);

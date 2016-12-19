@@ -5,15 +5,11 @@ USE "metadata";
 /* Metadata Entities */
 DROP TABLE IF EXISTS entities;
 CREATE TABLE entities (
-	id text PRIMARY KEY,
+	entityid text,
+    feed text,
 	metadata text,	-- JSON Structure
 	country text,
-  feed text,
 	created timestamp,
-	updated timestamp
+	updated timestamp,
+    PRIMARY KEY ((entityid), feed)
 );
-
-
-/*
-CREATE INDEX user_userid_sec_idx ON entities(userid_sec);
-*/
