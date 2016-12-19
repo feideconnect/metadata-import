@@ -39,6 +39,8 @@ COPY metadata-import /metadata-import
 RUN curl https://getcomposer.org/composer.phar > /metadata-import/composer.phar
 RUN cd /metadata-import && php ./composer.phar install --no-dev
 
+COPY etc/php.ini /usr/local/etc/php/
+
 WORKDIR /metadata-import
 
 CMD ["/metadata-import/getmetadata.php"]
