@@ -18,7 +18,7 @@ function getconfig($name, $default = null) {
 class Store {
 	/**
 	 * The Database object.
-	 *
+     *
 	 * @var DB
 	 */
 	public $db;
@@ -55,12 +55,12 @@ class Store {
 	/**
 	 * Convert long keys to something we can fit in the database table
 	 */
-	private function dbKey($key) {
-		if (strlen($key) > 50) {
-			$key = sha1($key);
-		}
-		return $key;
-	}
+	// private function dbKey($key) {
+	// 	if (strlen($key) > 50) {
+	// 		$key = sha1($key);
+	// 	}
+	// 	return $key;
+	// }
 	/**
 	 * Retrieve a value from the datastore.
 	 *
@@ -68,39 +68,39 @@ class Store {
 	 * @param string $key  The key.
 	 * @return mixed|NULL  The value.
 	 */
-	public function get($type, $key) {
-		assert('is_string($type)');
-		assert('is_string($key)');
-		$key = $this->dbKey($key);
-		$query = ' SELECT value FROM "session" WHERE type = :type AND key = :key';
-		$params = array('type' => $type, 'key' => $key);
-		// echo "<pre>About to perform a query \n"; print_r($query); echo "\n"; print_r($params);
-		// echo "\n\n";
-		// debug_print_backtrace();
-		// echo "\n------\n\n";
-		// exit;
-		// $result = $this->db->query($query, $params);
-		$statement = new \Cassandra\SimpleStatement($query);
-		$options = new \Cassandra\ExecutionOptions([
-			'arguments' => $params,
-			'consistency' => \Cassandra::CONSISTENCY_QUORUM,
-		]);
-		try {
-			$response = $this->db->execute($statement, $options);
-		} catch (\Cassandra\Exception $e) {
-			error_log("Received cassandra exception in get: " . $e);
-			throw $e;
-		}
-		if (count($response) < 1) return null;
-		$data = $response[0];
-		$value = $data["value"];
-		$value = urldecode($value);
-		$value = unserialize($value);
-		if ($value === FALSE) {
-			return NULL;
-		}
-		return $value;
-	}
+	// public function get($type, $key) {
+	// 	assert('is_string($type)');
+	// 	assert('is_string($key)');
+	// 	$key = $this->dbKey($key);
+	// 	$query = ' SELECT value FROM "session" WHERE type = :type AND key = :key';
+	// 	$params = array('type' => $type, 'key' => $key);
+	// 	// echo "<pre>About to perform a query \n"; print_r($query); echo "\n"; print_r($params);
+	// 	// echo "\n\n";
+	// 	// debug_print_backtrace();
+	// 	// echo "\n------\n\n";
+	// 	// exit;
+	// 	// $result = $this->db->query($query, $params);
+	// 	$statement = new \Cassandra\SimpleStatement($query);
+	// 	$options = new \Cassandra\ExecutionOptions([
+	// 		'arguments' => $params,
+	// 		'consistency' => \Cassandra::CONSISTENCY_QUORUM,
+	// 	]);
+	// 	try {
+	// 		$response = $this->db->execute($statement, $options);
+	// 	} catch (\Cassandra\Exception $e) {
+	// 		error_log("Received cassandra exception in get: " . $e);
+	// 		throw $e;
+	// 	}
+	// 	if (count($response) < 1) return null;
+	// 	$data = $response[0];
+	// 	$value = $data["value"];
+	// 	$value = urldecode($value);
+	// 	$value = unserialize($value);
+	// 	if ($value === FALSE) {
+	// 		return NULL;
+	// 	}
+	// 	return $value;
+	// }
 	/**
 	 * Save a value to the datastore.
 	 *
@@ -109,65 +109,69 @@ class Store {
 	 * @param mixed $value  The value.
 	 * @param int|NULL $expire  The expiration time (unix timestamp), or NULL if it never expires.
 	 */
-	public function insertOrUpdate($feed, $entityId, $metadata) {
+     public function insert($feed, $entityId, $metadata, $opUpdate = false) {
 
-		assert('is_string($feed)');
-		assert('is_string($entityId)');
-		assert('is_array($metadata)');
-		// $key = $this->dbKey($key);
-		$metadataJSON = json_encode($metadata, true);
-		$query = 'INSERT INTO "entities" (id, metadata, country, feed) VALUES (:id, :metadata, :country, :feed)';
-		// echo "About to insert \n"; print_r($query); print_r($params); echo "\n\n";
-		// $result = $this->db->query($query, $params);
-		$statement = new \Cassandra\SimpleStatement($query);
-    $params = array('id' => $entityId, 'metadata' => $metadataJSON, 'country' => 'no', 'feed' => $feed);
-		$options = new \Cassandra\ExecutionOptions([
-			'arguments' => $params,
-			'consistency' => \Cassandra::CONSISTENCY_QUORUM,
-		]);
-		try {
-			$this->db->execute($statement, $options);
-		} catch (\Cassandra\Exception $e) {
-			error_log("Received cassandra exception in set: " . $e);
-			throw $e;
-		}
-	}
+         assert('is_string($feed)');
+         assert('is_string($entityId)');
+         assert('is_array($metadata)');
+         // $key = $this->dbKey($key);
+         $metadataJSON = json_encode($metadata, true);
+         $query = 'INSERT INTO "entities" (id, metadata, country, feed, ' . ($opUpdate ? 'updated' : 'created') . ') VALUES (:id, :metadata, :country, :feed, :ts)';
+         // echo "About to insert \n"; print_r($query); print_r($params); echo "\n\n";
+         // $result = $this->db->query($query, $params);
+         $statement = new \Cassandra\SimpleStatement($query);
+         $params = array('id' => $entityId, 'metadata' => $metadataJSON, 'country' => 'no', 'feed' => $feed);
+         $params['ts'] = new \Cassandra\Timestamp();
+         $options = new \Cassandra\ExecutionOptions([
+             'arguments' => $params,
+             'consistency' => \Cassandra::CONSISTENCY_QUORUM,
+         ]);
+         try {
+             $this->db->execute($statement, $options);
+         } catch (\Cassandra\Exception $e) {
+             error_log("Received cassandra exception in set: " . $e);
+             throw $e;
+         }
+     }
 
 
-  public function getFeed($feed) {
-		assert('is_string($feed)');
-		// $key = $this->dbKey($key);
+     public function getFeed($feed) {
+         assert('is_string($feed)');
+         // $key = $this->dbKey($key);
 
-		$query = 'SELECT id,metadata,country,feed,created,updated FROM "entities" WHERE feed = :feed ALLOW FILTERING';
-		$params = array('feed' => $feed);
-		// echo "<pre>About to perform a query \n"; print_r($query); echo "\n"; print_r($params);
+         $query = 'SELECT id,metadata,country,feed,created,updated FROM "entities" WHERE feed = :feed ALLOW FILTERING';
+         $params = array('feed' => $feed);
 
-		// echo "\n\n";
-		// debug_print_backtrace();
-		// echo "\n------\n\n";
-		// exit;
-		// $result = $this->db->query($query, $params);
-		$statement = new \Cassandra\SimpleStatement($query);
-		$options = new \Cassandra\ExecutionOptions([
-			'arguments' => $params,
-			'consistency' => \Cassandra::CONSISTENCY_QUORUM,
-		]);
-		try {
-			$response = $this->db->execute($statement, $options);
-		} catch (\Cassandra\Exception $e) {
-			error_log("Received cassandra exception in get: " . $e);
-			throw $e;
-		}
-		// if (count($response) < 1) return [];
-    $res = [];
-    foreach($response AS $row) {
-      $row['metadata'] = json_decode($row['metadata'], true);
-      $res[] = $row;
-    }
-    print_r($res);
-    return $res;
+         // echo "<pre>About to perform a query \n"; print_r($query); echo "\n"; print_r($params);
+         // echo "\n\n";
+         // debug_print_backtrace();
+         // echo "\n------\n\n";
+         // exit;
+         // $result = $this->db->query($query, $params);
 
-  }
+         $statement = new \Cassandra\SimpleStatement($query);
+         $options = new \Cassandra\ExecutionOptions([
+             'arguments' => $params,
+             'consistency' => \Cassandra::CONSISTENCY_QUORUM,
+         ]);
+         try {
+             $response = $this->db->execute($statement, $options);
+         } catch (\Cassandra\Exception $e) {
+             error_log("Received cassandra exception in get: " . $e);
+             throw $e;
+         }
+         // if (count($response) < 1) return [];
+         $res = [];
+         foreach($response AS $row) {
+             $row['metadata'] = json_decode($row['metadata'], true);
+             $row['created'] = (isset($row['created']) ? $row['created']->time() : null);
+             $row['updated'] = (isset($row['updated']) ? $row['updated']->time() : null);
+             $res[] = $row;
+         }
+         print_r($res);
+         return $res;
+
+     }
 
 	/**
 	 * Delete a value from the datastore.
