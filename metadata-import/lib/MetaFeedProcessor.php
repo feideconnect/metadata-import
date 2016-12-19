@@ -12,8 +12,8 @@ class MetaFeedProcessor {
     }
 
     static function normalizeEntity($x) {
-        // unset($x['expire']);
-        // unset($x['entityDescriptor']);
+        unset($x['expire']);
+        unset($x['entityDescriptor']);
         return $x;
     }
 
