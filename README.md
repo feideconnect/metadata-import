@@ -34,3 +34,8 @@ clear; ./test.php
 ```
 
 rundev.sh also mounts the lib directory and the scripts. It means you can develop locally and re-test immediately.
+
+
+To speed up processing, fetch a local cached XML:
+
+curl -o /metadata-import/temp.xml http://mds.edugain.org
