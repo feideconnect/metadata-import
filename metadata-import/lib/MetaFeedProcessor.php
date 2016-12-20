@@ -64,6 +64,8 @@ class MetaFeedProcessor {
             $doValidate = false;
         }
 
+        $timeStart = time();
+
         $this->log->info("Processing feed " . $this->key, [
             "feed" => $this->key,
             "url" => $url,
@@ -202,7 +204,8 @@ class MetaFeedProcessor {
             "added" => $added,
             "updated" => $updated,
             "deleted" => $deleted,
-            "untouched" => (count($existingFeed) - $updated - $deleted)
+            "untouched" => (count($existingFeed) - $updated - $deleted),
+            "timerSeconds" => time() - $timeStart,
         ]);
     }
 
