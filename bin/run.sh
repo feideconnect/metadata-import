@@ -10,5 +10,6 @@ docker rm ${KUBERNETES_DEPLOYMENT}
 docker run -d --name ${KUBERNETES_DEPLOYMENT} \
   -v ${PWD}/etc/simplesamlphp-config:/feide/vendor/simplesamlphp/simplesamlphp/config \
   -v ${PWD}/etc/simplesamlphp-metadata:/feide/vendor/simplesamlphp/simplesamlphp/metadata \
+  --link cassameta:cassandra \
   --env-file ENV ${IMAGE}
 docker logs -f ${KUBERNETES_DEPLOYMENT}
