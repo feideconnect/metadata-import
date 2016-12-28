@@ -11,7 +11,6 @@ require_once('./lib/MetaFeedProcessor.php');
 require_once('./lib/MetaEngine.php');
 require_once('vendor/autoload.php');
 
-putenv('CASSANDRA_NODES=' . $_ENV['CASSANDRA_PORT_9042_TCP_ADDR']);
 
 $me = new MetaEngine();
 $me->process();
