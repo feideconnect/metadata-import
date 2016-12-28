@@ -26,7 +26,7 @@ class Store {
 	public function __construct() {
 		$config = [];
 		$keyspace 	= getconfig('CASSANDRA_KEYSPACE', 'metadata');
-		$nodes 		= explode(' ', getconfig('CASSANDRA_NODES'));
+		$nodes 		= explode(' ', getconfig('CASSANDRA_NODE'));
 		$use_ssl    = boolval( getconfig('CASSANDRA_USESSL', false) );
 		$ssl_ca     = getconfig('CASSANDRA_CA');
 		$username   = getconfig('CASSANDRA_USERNAME');
