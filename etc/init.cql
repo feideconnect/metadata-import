@@ -14,5 +14,9 @@ CREATE TABLE entities (
 	created timestamp,
 	updated timestamp,
 
+    logo blob,
+    logo_etag text,
+    logo_updated timestamp,
+
     PRIMARY KEY ((entityid), feed)
 );

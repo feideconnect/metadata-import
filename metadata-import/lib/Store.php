@@ -112,7 +112,8 @@ class Store {
          assert('is_string($feed)');
          assert('is_string($entityId)');
          assert('is_array($metadata)');
-         // $key = $this->dbKey($key);
+         assert('is_array($uimeta)');
+
          $metadataJSON = json_encode($metadata, true);
          $uimetaJSON = json_encode($uimeta, true);
          $query = 'INSERT INTO "entities" (feed, entityid, metadata, uimeta, reg, enabled, ' . ($opUpdate ? 'updated' : 'created') . ') VALUES (:feed, :entityid, :metadata, :uimeta, :reg, :enabled, :ts)';
@@ -140,8 +141,47 @@ class Store {
          }
      }
 
+	 /**
+ 	 * Save a value to the datastore.
+ 	 *
+ 	 * @param string $type  The datatype.
+ 	 * @param string $key  The key.
+ 	 * @param mixed $value  The value.
+ 	 * @param int|NULL $expire  The expiration time (unix timestamp), or NULL if it never expires.
+ 	 */
+    public function insertLogo($feed, $entityId, $content, $etag) {
 
-     public function getFeed($feed) {
+        assert('is_string($feed)');
+        assert('is_string($entityId)');
+        assert('is_string($content)');
+        assert('is_string($etag)');
+        $metadataJSON = json_encode($metadata, true);
+        $uimetaJSON = json_encode($uimeta, true);
+        $query = 'INSERT INTO "entities" (feed, entityid, logo, logo_etag, logo_updated) VALUES (:feed, :entityid, :content, :etag, :ts)';
+        // echo "About to insert \n"; print_r($query); print_r($params); echo "\n\n";
+        // $result = $this->db->query($query, $params);
+        $statement = new \Cassandra\SimpleStatement($query);
+        $params = [
+            'feed'     => $feed,
+            'entityid' => $entityId,
+            'content'  => new \Cassandra\Blob($content),
+            'uimeta'   => $uimetaJSON,
+            'etag'     => $etag,
+            'ts'       => new \Cassandra\Timestamp(),
+ 		];
+        $options = new \Cassandra\ExecutionOptions([
+            'arguments'   => $params,
+            'consistency' => \Cassandra::CONSISTENCY_QUORUM,
+        ]);
+        try {
+            $this->db->execute($statement, $options);
+        } catch (\Cassandra\Exception $e) {
+            error_log("Received cassandra exception in set: " . $e);
+            throw $e;
+        }
+    }
+
+    public function getFeed($feed) {
          assert('is_string($feed)');
          // $key = $this->dbKey($key);
 
