@@ -96,6 +96,7 @@ class MetaFeedProcessor {
         $added = 0;
         $updated = 0;
         $deleted = 0;
+        $i = 0;
 
         $this->log->info("Processing entities", [
             "feed" => $this->key,
@@ -130,6 +131,18 @@ class MetaFeedProcessor {
             // if ($existingFeed[$entityid]) {
             //     print_r($existingFeed[$entityid]); exit;
             // }
+
+
+            $logoProcessor = null;
+            if (isset($saml2idp['UIInfo']) && isset($saml2idp['UIInfo']['Logo'])) {
+                $logoProcessor = new LogoProcessor($saml2idp['UIInfo']['Logo']);
+                $logoProcessor->debug();
+                if (++$i > 5) {
+                    exit;
+                }
+            }
+
+
 
             $seen[$entityid] = true;
             if ($existingFeed[$entityid] && $existingFeed[$entityid]['enabled']) {
