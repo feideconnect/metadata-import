@@ -11,6 +11,7 @@ docker run -ti --name ${KUBERNETES_DEPLOYMENT} \
   -v ${PWD}/metadata-import/lib:/metadata-import/lib \
   -v ${PWD}/metadata-import/getmetadata.php:/metadata-import/getmetadata.php \
   -v ${PWD}/metadata-import/test.php:/metadata-import/test.php \
+  -v ${PWD}/metadata-import/config.php:/metadata-import/config.php \
   -v ${PWD}/metadata-import/var:/metadata-import/var \
   --link cassameta:cassandra \
   --env-file ENV ${IMAGE} bash
