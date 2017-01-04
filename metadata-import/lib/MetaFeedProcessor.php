@@ -128,20 +128,22 @@ class MetaFeedProcessor {
                 }
             }
 
-            // if ($existingFeed[$entityid]) {
-            //     print_r($existingFeed[$entityid]); exit;
-            // }
-
 
             $logoProcessor = null;
             if (isset($saml2idp['UIInfo']) && isset($saml2idp['UIInfo']['Logo'])) {
                 $logoProcessor = new LogoProcessor($saml2idp['UIInfo']['Logo']);
-                $logoProcessor->debug();
-                if (++$i > 5) {
-                    exit;
-                }
+                // $logoProcessor->debug();
+                // $logo = $logoProcessor->getLogo();
+                // echo "logo: " . base64_encode($logo) . "\n\n\n";
+                // if (++$i > 5) {
+                //     exit;
+                // }
             }
 
+            $doProcessLogo = false;
+            if (getenv('GET_ALL_LOGOS') === 'true') {
+                $doProcessLogo = true;
+            }
 
 
             $seen[$entityid] = true;
@@ -157,6 +159,7 @@ class MetaFeedProcessor {
                         "diff" => $diff,
                     ]);
                     $this->store->insert($this->key, $entityid, $saml2idp, self::getUIInfo($saml2idp), self::getReg($saml2idp), TRUE); // UPDATE
+                    $doProcessLogo = true;
                     $updated++;
 
 
@@ -165,7 +168,7 @@ class MetaFeedProcessor {
                     //     "entityID" => $entityid,
                     // ]);
                     // New entry is identical with the old one.
-                    continue;
+                    // continue;
                 }
 
             } else {
@@ -181,8 +184,34 @@ class MetaFeedProcessor {
                 }
 
                 $this->store->insert($this->key, $entityid, $saml2idp, self::getUIInfo($saml2idp), self::getReg($saml2idp), FALSE); // New entry
+                $doProcessLogo = true;
                 $added++;
             }
+
+            // $this->log->info("STATUS for logo", [
+            //     "entityID" => $entityid,
+            //     "doProcessLogo" => $doProcessLogo,
+            //     "processor" => ($logoProcessor !== null),
+            // ]);
+
+            if ($doProcessLogo && ($logoProcessor !== null)) {
+                $logo = $logoProcessor->getLogo();
+                $etag = hash('sha1', $logo);
+                if ($existingFeed[$entityid] && $existingFeed[$entityid]['logo_etag'] && $existingFeed[$entityid]['logo_etag'] === $etag) {
+                    $this->log->info("NO CHANGE on logo for entity", [
+                        "entityID" => $entityid,
+                        "etag" => $etag,
+                    ]);
+                } else {
+                    $this->log->info("INSERT logo for entity", [
+                        "entityID" => $entityid,
+                        "etag" => $etag,
+                    ]);
+                    $this->store->insertLogo($this->key, $entityid, $logo, $etag);
+                }
+
+            }
+
 
             if (isset($_ENV['DEBUG_DUMP']) && $_ENV['DEBUG_DUMP'] === 'true') {
                 $outfilename = '/metadata-import/var/' . sha1($entityid) . '.json';
