@@ -14,8 +14,8 @@ This section goes through the steps for running this script in a development env
 ## Run cassandra
 
 ```
-docker pull cassandra:3.0
-docker run --name cassameta -d cassandra:3.0
+docker pull cassandra:2.2
+docker run --name cassameta -d cassandra:2.2
 # docker exec -ti cassameta sh -c 'exec cqlsh "$CASSANDRA_PORT_9042_TCP_ADDR"'
 docker exec -ti cassameta sh -c 'exec cqlsh'
 docker exec -i cassameta sh -c 'exec cqlsh' < etc/init.cql
