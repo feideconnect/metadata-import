@@ -110,7 +110,7 @@ class LogoProcessor {
         if (!self::isValidURL($entry['url'])) {
             return null;
         }
-        $rawimg = url_get_contents($entry['url']);
+        $rawimg = self::url_get_contents($entry['url']);
         return $rawimg;
     }
 
@@ -145,7 +145,7 @@ class LogoProcessor {
 		return true;
 	}
 
-    function url_get_contents ($Url) {
+    protected static function url_get_contents ($Url) {
         if (!function_exists('curl_init')){
             die('CURL is not installed!');
         }
