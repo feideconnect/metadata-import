@@ -7,6 +7,7 @@
 require_once('./lib/Logger.php');
 require_once('./lib/Store.php');
 require_once('./lib/MetaFetcher.php');
+require_once('./lib/LogoProcessor.php');
 require_once('./lib/MetaFeedProcessor.php');
 require_once('./lib/MetaEngine.php');
 require_once('vendor/autoload.php');
@@ -16,67 +17,8 @@ $me = new MetaEngine();
 $me->process();
 
 
-function formatXML(DOMElement $root, $indentBase = '') {
-    if (!is_string($indentBase)) {
-        throw new \InvalidArgumentException('Invalid input parameters');
-    }
-    // check what this element contains
-    $fullText = ''; // all text in this element
-    $textNodes = array(); // text nodes which should be deleted
-    $childNodes = array(); // other child nodes
-    for ($i = 0; $i < $root->childNodes->length; $i++) {
-        $child = $root->childNodes->item($i);
-        if ($child instanceof \DOMText) {
-            $textNodes[] = $child;
-            $fullText .= $child->wholeText;
-        } elseif ($child instanceof \DOMComment || $child instanceof \DOMElement) {
-            $childNodes[] = $child;
-        } else {
-            // unknown node type. We don't know how to format this
-            return;
-        }
-    }
 
-    // Check if we have any non-whitespace text elements.
-    $hasText = strlen(trim($fullText)) > 0;
-    if ($hasText) {
-        // Leave the text as-is.
-        return;
-    }
 
-    // Remove text nodes. Since we get this far, the text nodes only contain whitespace.
-    foreach ($textNodes as $node) {
-        $root->removeChild($node);
-    }
-
-    $hasChildNode = (count($childNodes) > 0);
-    if (!$hasChildNode) {
-        // Empty node. Nothing more to do
-        return;
-    }
-    /* Element contains only child nodes - add indentation before each one, and
-     * format child elements.
-     */
-    $childIndentation = $indentBase . '  ';
-    foreach ($childNodes as $node) {
-        // add indentation before node
-        $root->insertBefore(new \DOMText("\n" . $childIndentation), $node);
-        // format child elements
-        if ($node instanceof \DOMElement) {
-            formatXML($node, $childIndentation);
-        }
-    }
-    // add indentation before closing tag
-    $root->appendChild(new \DOMText("\n" . $indentBase));
-}
-
-function getEntityXML(SAML2_XML_md_EntityDescriptor $entity) {
-    $xml = $entity->toXML();
-    $doc = $xml->ownerDocument;
-    $doc->encoding = 'utf-8';
-    formatXML($xml);
-    return $doc->saveXML();
-}
 
 function refeds_rns(SAML2_XML_md_EntityDescriptor $entity) {
     $rns_attrs = array(
@@ -175,13 +117,4 @@ function refeds_rns(SAML2_XML_md_EntityDescriptor $entity) {
             } // attribute values
         } // attributes
     } // extensions
-}
-
-function processEntity(SAML2_XML_md_EntityDescriptor $entity, $processors) {
-    foreach ($processors as $processor) {
-        if (function_exists($processor)) {
-            $processor($entity);
-        }
-    }
-    return getEntityXML($entity);
 }
