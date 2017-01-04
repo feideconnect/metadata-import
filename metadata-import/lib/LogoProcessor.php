@@ -22,7 +22,6 @@ class LogoProcessor {
             foreach($this->entries AS $entry) {
                 if (isset($entry['height']) && isset($entry['width'])) {
                     $area = intval($entry['height']) * intval($entry['width']);
-                    echo "has area $area \n";
                     if ($area > $max) {
                         $this->picked = $entry;
                         $max = $area;
@@ -68,18 +67,18 @@ class LogoProcessor {
         $rawimg = self::getLogoContent($entry);
 
         if ($rawimg === null) {
-            echo "Got null as image\n";
-            die("a");
+            // echo "Got null as image\n";
+            // die("a");
             return null;
         }
 
-        echo "logo content i s" . $rawimg . "\n\n";
+        // echo "logo content i s" . $rawimg . "\n\n";
 
         $imgOrgFile = tempnam('/tmp', 'logo-org-');
         $imgNewFile = tempnam('/tmp', 'logo-rsz-');
         file_put_contents($imgOrgFile, $rawimg);
 
-        echo "about to load image " . $imgOrgFile . "\n";
+        // echo "about to load image " . $imgOrgFile . "\n";
         $image = new SimpleImage();
         $image->load($imgOrgFile);
         $image->square(256);
@@ -88,22 +87,22 @@ class LogoProcessor {
 
         $res = file_get_contents($imgNewFile);
 
-        // unlink($imgOrgFile);
-        // unlink($imgNewFile);
+        unlink($imgOrgFile);
+        unlink($imgNewFile);
 
         return $res;
     }
 
 
     protected static function getLogoContent($entry) {
-        echo "about to get content from ";
-        print_r($entry);
+        // echo "about to get content from ";
+        // print_r($entry);
         if (!isset($entry['url'])) {
             return null;
         }
         $embedded = self::isValidEmbedded($entry['url']);
 
-        echo "result from embedded is " . $embedded;
+        // echo "result from embedded is " . $embedded;
 
         if ($embedded !== null) {
             return $embedded;
