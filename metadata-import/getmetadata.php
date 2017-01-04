@@ -4,6 +4,7 @@
  * Fetch metadata feeds, and split them into individual XML files for each entityID.
  */
 
+require_once('./lib/ext/SimpleImage.php');
 require_once('./lib/Logger.php');
 require_once('./lib/Store.php');
 require_once('./lib/MetaFetcher.php');

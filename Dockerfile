@@ -20,6 +20,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   php5-dev \
   php5-gmp \
   php5-imagick \
+  libfreetype6-dev libjpeg62-turbo-dev libpng12-dev \
   libmcrypt-dev \
   && rm -rf /var/lib/apt/lists/*
 
@@ -32,7 +33,9 @@ RUN git clone https://github.com/datastax/php-driver.git /tmp/php-driver && \
   cd / && \
   rm -rf /tmp/php-driver
 
-RUN docker-php-ext-install -j$(nproc) iconv mcrypt
+RUN docker-php-ext-install -j$(nproc) iconv mcrypt && \
+    docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ && \
+    docker-php-ext-install -j$(nproc) gd
 # RUN echo 'extension=mcrypt.so'   >  /usr/local/etc/php/conf.d/php-ext-mcrypt.ini
 RUN echo 'extension=cassandra.so' > /usr/local/etc/php/conf.d/php-ext-cassandra.ini
 
