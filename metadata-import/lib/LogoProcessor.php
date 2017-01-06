@@ -153,18 +153,25 @@ class LogoProcessor {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $Url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 2);
-    	curl_setopt($ch, CURLOPT_TIMEOUT, 2); //timeout in seconds
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
+    	curl_setopt($ch, CURLOPT_TIMEOUT, 10); //timeout in seconds
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
     	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, TRUE);
     	// curl_setopt($ch, CURLOPT_SSLVERSION, 3);
-        $output = curl_exec($ch);
+        $output   = curl_exec($ch);
+        $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
         if ($output === false) {
         	$err = curl_error($ch);
             curl_close($ch);
             throw new \Exception('Error downloading data from ' . $Url . ": " . $err);
         }
         curl_close($ch);
+
+        if ($httpcode !== 200) {
+            throw new \Exception('Error downloading data from ' . $Url . ": HTTP Status code " . $httpcode);
+        }
         return $output;
     }
 
