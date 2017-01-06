@@ -51,7 +51,7 @@ class LogoProcessor {
         } catch (Exception $e) {
             error_log("Error loading logo from " . var_export($this->picked, true));
             echo $e->getMessage() . "\n";
-            print_r($e);
+            // print_r($e);
         }
         return $logo;
     }
@@ -79,6 +79,7 @@ class LogoProcessor {
         file_put_contents($imgOrgFile, $rawimg);
 
         // echo "about to load image " . $imgOrgFile . "\n";
+        // echo "rawimage : " . var_export($rawimg, true) . "\n";
         $image = new SimpleImage();
         $image->load($imgOrgFile);
         $image->square(256);
