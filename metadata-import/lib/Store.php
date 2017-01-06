@@ -185,7 +185,7 @@ class Store {
          assert('is_string($feed)');
          // $key = $this->dbKey($key);
 
-         $query = 'SELECT entityid, feed, enabled, verification, metadata, uimeta, reg, created, updated FROM "entities" WHERE feed = :feed ALLOW FILTERING';
+         $query = 'SELECT entityid, feed, enabled, verification, metadata, uimeta, reg, created, updated, logo_etag FROM "entities" WHERE feed = :feed ALLOW FILTERING';
          $params = array('feed' => $feed);
 
          // echo "<pre>About to perform a query \n"; print_r($query); echo "\n"; print_r($params);
