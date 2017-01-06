@@ -153,7 +153,7 @@ class Store {
 
         assert('is_string($feed)');
         assert('is_string($entityId)');
-        assert('is_string($content)');
+        // assert('is_string($content)');
         assert('is_string($etag)');
         $metadataJSON = json_encode($metadata, true);
         $uimetaJSON = json_encode($uimeta, true);
