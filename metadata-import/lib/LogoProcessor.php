@@ -99,7 +99,7 @@ class LogoProcessor {
         // echo "about to get content from ";
         // print_r($entry);
         if (!isset($entry['url'])) {
-            return null;
+            throw new \Exception('Missing logo URL. URL parameter not present in logo metadata entry.');
         }
         $embedded = self::isValidEmbedded($entry['url']);
 
@@ -109,7 +109,7 @@ class LogoProcessor {
             return $embedded;
         }
         if (!self::isValidURL($entry['url'])) {
-            return null;
+            return new \Exception('Logo URL was not valid: ' . $entry['url']);
         }
         $rawimg = self::url_get_contents($entry['url']);
         return $rawimg;
@@ -148,7 +148,7 @@ class LogoProcessor {
 
     protected static function url_get_contents ($Url) {
         if (!function_exists('curl_init')){
-            die('CURL is not installed!');
+            throw new \Exception('CURL is not installed! Will not download logo.');
         }
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $Url);
@@ -161,8 +161,8 @@ class LogoProcessor {
         $output = curl_exec($ch);
         if ($output === false) {
         	$err = curl_error($ch);
-            echo "Error downloading from " . $Url . "\n";
-        	// DiscoUtils::error('Error downloading from [' . $Url . '] ' . $err);
+            curl_close($ch);
+            throw new \Exception('Error downloading data from ' . $Url . ": " . $err);
         }
         curl_close($ch);
         return $output;
