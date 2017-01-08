@@ -74,8 +74,15 @@ class LogoProcessor {
 
         // echo "logo content i s" . $rawimg . "\n\n";
 
-        $imgOrgFile = tempnam('/tmp', 'logo-org-');
-        $imgNewFile = tempnam('/tmp', 'logo-rsz-');
+        $logoDir = '/tmp';
+        $cleanUp = true;
+        if (getenv('LOGODIR')) {
+            $logoDir = getenv('LOGODIR');
+            $cleanUp = false;
+        }
+
+        $imgOrgFile = tempnam($logoDir, 'logo-org-');
+        $imgNewFile = tempnam($logoDir, 'logo-rsz-');
         file_put_contents($imgOrgFile, $rawimg);
 
         // echo "about to load image " . $imgOrgFile . "\n";
@@ -89,7 +96,9 @@ class LogoProcessor {
         $res = file_get_contents($imgNewFile);
 
         unlink($imgOrgFile);
-        unlink($imgNewFile);
+        if ($cleanUp) {
+            unlink($imgNewFile);
+        }
 
         return $res;
     }
