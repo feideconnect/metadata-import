@@ -180,6 +180,17 @@ class SimpleImage {
 		return $this->cut($x, $y, $width, $height);
 	}
 
+	public function fillSquare() {
+		if ($this->getWidth() === $this->getHeight()) {
+			return null;
+		}
+		$maxlength = $this->getWidth();
+		if ($this->getHeight() > $maxlength) {
+			$maxlength = $this->getHeight();
+		}
+		return $this->maxareafill($maxlength, $maxlength, 255, 255, 255);
+	}
+
 	public function maxareafill($width, $height, $red = 0, $green = 0, $blue = 0) {
 	    $this->maxarea($width, $height);
 	    $new_image = imagecreatetruecolor($width, $height);

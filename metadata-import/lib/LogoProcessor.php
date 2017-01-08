@@ -89,7 +89,7 @@ class LogoProcessor {
         // echo "rawimage : " . var_export($rawimg, true) . "\n";
         $image = new SimpleImage();
         $image->load($imgOrgFile);
-        $image->square(256);
+        $image->fillSquare();
         $image->resize(64, 64);
         $image->save($imgNewFile);
 
