@@ -1,5 +1,7 @@
 <?php
 
+namespace Dataporten\MetadataImport;
+
 // use \Monolog\Logger;
 use \Monolog\Handler\StreamHandler;
 use \Monolog\Handler\ErrorLogHandler;

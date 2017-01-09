@@ -40,14 +40,18 @@ RUN docker-php-ext-install -j$(nproc) iconv mcrypt && \
 RUN echo 'extension=cassandra.so' > /usr/local/etc/php/conf.d/php-ext-cassandra.ini
 
 COPY etc/php.ini /usr/local/etc/php/
-COPY metadata-import /metadata-import
+
+RUN mkdir -p /metadata-import && mkdir -p /metadata-import/etc
+WORKDIR /metadata-import
+COPY composer.json /metadata-import/
 
 RUN curl https://getcomposer.org/composer.phar > /metadata-import/composer.phar
 RUN php --ini
 RUN cd /metadata-import && php ./composer.phar install --no-dev
 
+COPY bin /metadata-import/bin
+COPY lib /metadata-import/lib
+COPY etc/config.php /metadata-import/etc/config.php
 
 
-WORKDIR /metadata-import
-
-CMD ["/metadata-import/getmetadata.php"]
+CMD ["/metadata-import/bin/getmetadata.php"]

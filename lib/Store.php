@@ -1,6 +1,6 @@
 <?php
 
-
+namespace Dataporten\MetadataImport;
 
 function getconfig($name, $default = null) {
 	$val = getenv($name);

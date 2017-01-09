@@ -1,5 +1,7 @@
 <?php
 
+namespace Dataporten\MetadataImport;
+
 class MetaEngine {
 
     protected $store = null;
@@ -15,7 +17,7 @@ class MetaEngine {
 
     protected function getFeeds() {
         $feed = array();
-        include(dirname(dirname(__FILE__)) . '/config.php');
+        include(dirname(dirname(__FILE__)) . '/etc/config.php');
         return $feed;
     }
 

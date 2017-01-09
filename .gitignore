@@ -1,3 +1,5 @@
 ENV
-metadata-import/var
+var
 etc/data.txt
+composer.lock
+vendor

@@ -1,5 +1,13 @@
 <?php
 
+namespace Dataporten\MetadataImport;
+use SAML2_XML_md_EntitiesDescriptor;
+use SAML2_XML_md_EntityDescriptor;
+use SAML2_Const;
+use XMLSecurityKey;
+use DOMDocument;
+use Exception;
+
 class MetaFetcher {
 
     static function fetch($url) {
@@ -24,7 +32,7 @@ class MetaFetcher {
             throw new Exception('Error parsing XML: ' . $error['message']);
         }
         $root = $doc->documentElement;
-        if ($root->namespaceURI !== SAML2_Const::NS_MD || $root->localName !== 'EntitiesDescriptor') {
+        if ($root->namespaceURI !== \SAML2_Const::NS_MD || $root->localName !== 'EntitiesDescriptor') {
             throw new Exception('Got unknown root element in metadata: {' . $root->namespaceURI . '}' . $root->localName);
         }
         return new SAML2_XML_md_EntitiesDescriptor($root);

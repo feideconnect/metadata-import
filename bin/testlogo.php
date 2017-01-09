@@ -1,17 +1,9 @@
 #! /usr/local/bin/php
 <?php
 
+require_once(__DIR__ . '/../vendor/autoload.php');
 
-require_once('./lib/ext/SimpleImage.php');
-require_once('./lib/Logger.php');
-require_once('./lib/Store.php');
-require_once('./lib/MetaFetcher.php');
-require_once('./lib/LogoProcessor.php');
-require_once('./lib/MetaFeedProcessor.php');
-require_once('./lib/MetaEngine.php');
-require_once('vendor/autoload.php');
-
-
+use Dataporten\MetadataImport\LogoProcessor;
 
 $entry = [
     'url' => 'https://idp.howcollege.ac.uk/logo.png',

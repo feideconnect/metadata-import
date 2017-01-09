@@ -1,5 +1,10 @@
 {
     "minimum-stability": "dev",
+    "autoload": {
+        "psr-4": {
+            "Dataporten\\MetadataImport\\": "lib/"
+        }
+    },
     "require": {
         "simplesamlphp/saml2": "dev-master",
         "simplesamlphp/composer-module-installer": "~1.0",

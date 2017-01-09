@@ -1,6 +1,12 @@
 <?php
 
-require_once(dirname(__FILE__) . '/JSONTools.php');
+namespace Dataporten\MetadataImport;
+
+use Dataporten\MetadataImport\ext\JSONTools;
+use SimpleSAML_Metadata_SAMLParser;
+use Exception;
+
+// require_once(dirname(__FILE__) . '/JSONTools.php');
 
 class MetaFeedProcessor {
     protected $log, $store, $key, $config;

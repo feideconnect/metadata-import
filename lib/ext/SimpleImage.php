@@ -17,6 +17,9 @@
  * http://www.gnu.org/licenses/gpl.html
  */
 
+namespace Dataporten\MetadataImport\ext;
+use Exception;
+
 class SimpleImage {
 
 	public $image;

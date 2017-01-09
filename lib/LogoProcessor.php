@@ -1,5 +1,9 @@
 <?php
 
+namespace Dataporten\MetadataImport;
+
+use Dataporten\MetadataImport\ext\SimpleImage;
+use Exception;
 
 class LogoProcessor {
 

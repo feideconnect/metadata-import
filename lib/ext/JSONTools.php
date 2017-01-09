@@ -1,4 +1,8 @@
 <?php
+
+namespace Dataporten\MetadataImport\ext;
+
+
 /**
  * Tool for doing diffs of nested arrays
  *
