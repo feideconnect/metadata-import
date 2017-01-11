@@ -14,6 +14,8 @@ docker run -ti --name ${KUBERNETES_DEPLOYMENT} \
   -v ${PWD}/var:/metadata-import/var \
   --link cassameta:cassandra \
   --env-file ENV ${IMAGE} bash
+
+
 #docker logs -f ${KUBERNETES_DEPLOYMENT}
 
 

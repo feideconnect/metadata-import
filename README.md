@@ -6,6 +6,13 @@ This repository holds the job that fetches SAML 2.0 metadata from international 
 
 Running with simplesamlphp and SAML2 lib `dev-master` because of need of the RegistrationInfo support in SAMLParser.php.
 
+## Configuration: Environment variables
+
+```
+CASSANDRA_KEYSPACE=metadata
+CASSANDRA_NODE=cassandra
+```
+
 
 ## Development / testing
 
