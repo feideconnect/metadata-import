@@ -5,6 +5,8 @@ require_once(__DIR__ . '/../vendor/autoload.php');
 
 use Dataporten\MetadataImport\LogoProcessor;
 
+
+
 $entry = [
     'url' => 'https://idp.howcollege.ac.uk/logo.png',
     'height' => 60,
@@ -15,6 +17,13 @@ $entry = array(
   'height' => 79,
   'width' => 108,
 );
+
+$entry = [
+    "url" => "https://www.fhs.se/files/sidhuvud/logotyp-sv.jpg",
+    "height" => 118,
+    "width" => 106,
+    "lang" => "sv",
+];
 // $entry = array(
 //   'url' => 'https://www.nmc.teicrete.gr/sites/default/files/images/logo-teicrete-350x76.png',
 //   'height' => 350,
@@ -31,6 +40,8 @@ $entry = array(
 $logoProcessor = new LogoProcessor($entry);
 
 $logo = $logoProcessor->getLogo();
+
+
 
 echo "Logo " . base64_encode($logo) . "\n";
 echo sha1($logo) . "\n";
