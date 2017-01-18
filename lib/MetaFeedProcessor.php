@@ -123,6 +123,10 @@ class MetaFeedProcessor {
                 continue;
             }
 
+
+            /*
+             * Generate some chages from runtime to the next in order to test how changes are handled.
+             */
             if (isset($_ENV['DEBUG_RANDOMIZE']) && $_ENV['DEBUG_RANDOMIZE'] === 'true') {
                 if (mt_rand(0, 100) >= 99) {
                     continue;
@@ -202,20 +206,21 @@ class MetaFeedProcessor {
 
             if ($doProcessLogo && ($logoProcessor !== null)) {
                 $logo = $logoProcessor->getLogo();
-                $etag = hash('sha1', $logo);
-                if ($existingFeed[$entityid] && $existingFeed[$entityid]['logo_etag'] && $existingFeed[$entityid]['logo_etag'] === $etag) {
-                    $this->log->info("NO CHANGE on logo for entity", [
-                        "entityID" => $entityid,
-                        "etag" => $etag,
-                    ]);
-                } else {
-                    $this->log->info("INSERT logo for entity", [
-                        "entityID" => $entityid,
-                        "etag" => $etag,
-                    ]);
-                    $this->store->insertLogo($this->key, $entityid, $logo, $etag);
+                if ($logo !== null) {
+                    $etag = hash('sha1', $logo);
+                    if ($existingFeed[$entityid] && $existingFeed[$entityid]['logo_etag'] && $existingFeed[$entityid]['logo_etag'] === $etag) {
+                        $this->log->info("NO CHANGE on logo for entity", [
+                            "entityID" => $entityid,
+                            "etag" => $etag,
+                        ]);
+                    } else {
+                        $this->log->info("INSERT logo for entity", [
+                            "entityID" => $entityid,
+                            "etag" => $etag,
+                        ]);
+                        $this->store->insertLogo($this->key, $entityid, $logo, $etag);
+                    }
                 }
-
             }
 
 
