@@ -30,7 +30,7 @@ class Store {
 		$use_ssl    = boolval( getconfig('CASSANDRA_USESSL', false) );
 		$ssl_ca     = getconfig('CASSANDRA_CA');
 		$username   = getconfig('CASSANDRA_USERNAME');
-		$password   = getconfig('CASSANDRA_PASSWD');
+		$password   = getconfig('CASSANDRA_PASSWORD');
 
 		$cluster = \Cassandra::cluster()
 				 ->withContactPoints(implode(',', $nodes))
