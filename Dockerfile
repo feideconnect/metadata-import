@@ -16,10 +16,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   libuv-dev \
   locales \
   make \
-  php5-curl \
-  php5-dev \
-  php5-gmp \
-  php5-imagick \
   libfreetype6-dev libjpeg62-turbo-dev libpng12-dev \
   libmcrypt-dev \
   && rm -rf /var/lib/apt/lists/*
