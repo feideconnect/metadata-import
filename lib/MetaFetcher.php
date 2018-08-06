@@ -40,7 +40,7 @@ class MetaFetcher {
 
     static function validate_signature($metadata, $certs) {
         foreach ($certs as $cert) {
-            $key = new XMLSecurityKey(XMLSecurityKey::RSA_SHA1, array('type' => 'public'));
+            $key = new XMLSecurityKey(XMLSecurityKey::RSA_SHA256, array('type' => 'public'));
             $valid = false;
             $key->loadKey($cert, false, true);
             try {
